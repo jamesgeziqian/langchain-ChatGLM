@@ -8,6 +8,31 @@ export const chat = (params: any) => {
   })
 }
 
+const streaming = (path: string, params: any, callback: (data: any, ended: boolean) => any) => {
+  // connection to self would be proxied to backend by vite (dev) or nginx (prod)
+  const socketConn = new WebSocket(`ws://${window.location.host}/socket${path}`)
+  socketConn.onopen = () => {
+    socketConn.send(JSON.stringify(params))
+    socketConn.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      if (data?.flag === 'end') {
+        socketConn.close()
+        callback(data, true)
+        return
+      }
+      callback(data, false)
+    }
+  }
+}
+
+export const streamChat = (params: any, callback: (data: any, ended: boolean) => any) => {
+  streaming('/local_doc_qa/stream_chat', params, callback)
+}
+
+export const streamBingSearch = (params: any, callback: (data: any, ended: boolean) => any) => {
+  streaming('/local_doc_qa/stream_chat_bing', params, callback)
+}
+
 export const chatfile = (params: any) => {
   return api({
     url: '/local_doc_qa/local_doc_chat',

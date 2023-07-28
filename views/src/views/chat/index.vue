@@ -15,7 +15,7 @@ import { useIconRender } from '@/hooks/useIconRender'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
 import { t } from '@/locales'
-import { bing_search, chat, chatfile } from '@/api/chat'
+import { bing_search, chat, chatfile, streamChat } from '@/api/chat'
 import { idStore } from '@/store/modules/knowledgebaseid/id'
 let controller = new AbortController()
 const { iconRender } = useIconRender()
@@ -114,6 +114,36 @@ async function handleSubmit() {
   }
 }
 
+interface StreamingProps {
+  question: string
+  history?: [string]
+  knowledge_base_id?: string
+}
+
+function handleStreamChatIn(streamFunc: (params: any, callback: (data: any, ended: boolean) => void) => void, params: StreamingProps, options: Chat.ConversationRequest) {
+  // 打字机效果
+  const callback = (data: any, ended: boolean) => {
+    const result = (active.value && ended) ? `${data.response}\n\n数据来源：\n\n>${data.source_documents.join('>')}` : data.response
+    const lastText = dataSources.value[dataSources.value.length - 1].text
+    updateChat(
+      +uuid,
+      dataSources.value.length - 1,
+      {
+        dateTime: new Date().toLocaleString(),
+        text: lastText + (result ?? ''),
+        inversion: false,
+        error: false,
+        loading: false,
+        conversationOptions: null,
+        requestOptions: { prompt: params.question, options: { ...options } },
+      },
+    )
+    scrollToBottomIfAtBottom()
+    loading.value = false
+  }
+  streamFunc(params, callback)
+}
+
 async function onConversation() {
   const message = prompt.value
   history.value = []
@@ -168,34 +198,35 @@ async function onConversation() {
   scrollToBottom()
 
   try {
-    const lastText = ''
+    // const lastText = ''
     const fetchChatAPIOnce = async () => {
-      const res = active.value
-        ? await chatfile({
-          knowledge_base_id: idstore.knowledgeid,
-          question: message,
-          history: history.value,
-        })
-        : await chat({
-          question: message,
-          history: history.value,
-        })
-      const result = active.value ? `${res.data.response}\n\n数据来源：\n\n>${res.data.source_documents.join('>')}` : res.data.response
-      updateChat(
-        +uuid,
-        dataSources.value.length - 1,
-        {
-          dateTime: new Date().toLocaleString(),
-          text: lastText + (result ?? ''),
-          inversion: false,
-          error: false,
-          loading: false,
-          conversationOptions: null,
-          requestOptions: { prompt: message, options: { ...options } },
-        },
-      )
-      scrollToBottomIfAtBottom()
-      loading.value = false
+      handleStreamChatIn(streamChat, { question: message, history: history.value }, options)
+      // const res = active.value
+      //   ? await chatfile({
+      //     knowledge_base_id: idstore.knowledgeid,
+      //     question: message,
+      //     history: history.value,
+      //   })
+      //   : await chat({
+      //     question: message,
+      //     history: history.value,
+      //   })
+      // const result = active.value ? `${res.data.response}\n\n数据来源：\n\n>${res.data.source_documents.join('>')}` : res.data.response
+      // updateChat(
+      //   +uuid,
+      //   dataSources.value.length - 1,
+      //   {
+      //     dateTime: new Date().toLocaleString(),
+      //     text: lastText + (result ?? ''),
+      //     inversion: false,
+      //     error: false,
+      //     loading: false,
+      //     conversationOptions: null,
+      //     requestOptions: { prompt: message, options: { ...options } },
+      //   },
+      // )
+      // scrollToBottomIfAtBottom()
+      // loading.value = false
       /* await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
         options,
