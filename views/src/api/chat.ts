@@ -33,6 +33,42 @@ export const streamBingSearch = (params: any, callback: (data: any, ended: boole
   streaming('/local_doc_qa/stream_chat_bing', params, callback)
 }
 
+const fetchStream = async (url: string, params: any) => {
+  const { onmessage, onclose, ...otherParams } = params
+
+  const push = async (controller: ReadableStreamDefaultController, reader: ReadableStreamDefaultReader) => {
+    const { value, done } = await reader.read()
+    if (done) {
+      controller.close()
+      onclose?.()
+    }
+    else {
+      // 约定使用\x03 (End of Text) 作为JSON分隔符
+      const decoded = new TextDecoder().decode(value).split('\x03').filter(s => s.length > 0)
+      for (const s of decoded)
+        onmessage?.(JSON.parse(s))
+
+      // onmessage?.(JSON.parse(new TextDecoder().decode(value)).split('\u0003'))
+      controller.enqueue(value)
+      push(controller, reader)
+    }
+  }
+  // 发送请求
+  const response = await fetch(url, otherParams)
+  // 以ReadableStream解析数据
+  const reader = response.body!.getReader()
+  const stream = new ReadableStream({
+    start(controller) {
+      push(controller, reader)
+    },
+  })
+  return await new Response(stream).text()
+}
+
+export const streamFetch = (url: string, params: any) => {
+  return fetchStream(`/api${url}`, params)
+}
+
 export const chatfile = (params: any) => {
   return api({
     url: '/local_doc_qa/local_doc_chat',

@@ -15,7 +15,7 @@ import { useIconRender } from '@/hooks/useIconRender'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
 import { t } from '@/locales'
-import { bing_search, chat, chatfile, streamChat } from '@/api/chat'
+import { bing_search, chat, chatfile, streamFetch } from '@/api/chat'
 import { idStore } from '@/store/modules/knowledgebaseid/id'
 let controller = new AbortController()
 const { iconRender } = useIconRender()
@@ -120,10 +120,34 @@ interface StreamingProps {
   knowledge_base_id?: string
 }
 
-function handleStreamChatIn(streamFunc: (params: any, callback: (data: any, ended: boolean) => void) => void, params: StreamingProps, options: Chat.ConversationRequest) {
+// function handleStreamSocketChatIn(streamFunc: (params: any, callback: (data: any, ended: boolean) => void) => void, params: StreamingProps, options: Chat.ConversationRequest) {
+//   // 打字机效果
+//   const callback = (data: any, ended: boolean) => {
+//     const result = (active.value && ended) ? `${data.response}\n\n数据来源：\n\n>${data.source_documents.join('>')}` : data.response
+//     const lastText = dataSources.value[dataSources.value.length - 1].text
+//     updateChat(
+//       +uuid,
+//       dataSources.value.length - 1,
+//       {
+//         dateTime: new Date().toLocaleString(),
+//         text: lastText + (result ?? ''),
+//         inversion: false,
+//         error: false,
+//         loading: false,
+//         conversationOptions: null,
+//         requestOptions: { prompt: params.question, options: { ...options } },
+//       },
+//     )
+//     scrollToBottomIfAtBottom()
+//     loading.value = false
+//   }
+//   streamFunc(params, callback)
+// }
+
+async function handleStreamChatIn(params: StreamingProps, options: Chat.ConversationRequest) {
   // 打字机效果
   const callback = (data: any, ended: boolean) => {
-    const result = (active.value && ended) ? `${data.response}\n\n数据来源：\n\n>${data.source_documents.join('>')}` : data.response
+    const result = (active.value && ended) ? `${data.result}\n\n数据来源：\n\n>${data.source_documents.join('>')}` : data.result
     const lastText = dataSources.value[dataSources.value.length - 1].text
     updateChat(
       +uuid,
@@ -141,7 +165,7 @@ function handleStreamChatIn(streamFunc: (params: any, callback: (data: any, ende
     scrollToBottomIfAtBottom()
     loading.value = false
   }
-  streamFunc(params, callback)
+  streamFetch('/local_doc_qa/stream_json', { method: 'POST', onmessage: callback })
 }
 
 async function onConversation() {
@@ -200,7 +224,8 @@ async function onConversation() {
   try {
     // const lastText = ''
     const fetchChatAPIOnce = async () => {
-      handleStreamChatIn(streamChat, { question: message, history: history.value }, options)
+      // handleStreamSocketChatIn(streamChat, { question: message, history: history.value }, options)
+      handleStreamChatIn({ question: message }, options)
       // const res = active.value
       //   ? await chatfile({
       //     knowledge_base_id: idstore.knowledgeid,
