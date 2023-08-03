@@ -66,7 +66,7 @@ const fetchStream = async (url: string, params: any) => {
 }
 
 export const streamFetch = (params: any) => {
-  return fetchStream('/local_doc_search', params)
+  return fetchStream('/local_doc_search_stream_chat', params)
 }
 
 export const chatfile = (params: any) => {
