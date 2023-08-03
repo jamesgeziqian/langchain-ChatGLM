@@ -54,7 +54,7 @@ const fetchStream = async (url: string, params: any) => {
     }
   }
   // 发送请求
-  const response = await fetch(url, otherParams)
+  const response = await fetch(`/api${url}`, otherParams)
   // 以ReadableStream解析数据
   const reader = response.body!.getReader()
   const stream = new ReadableStream({
@@ -65,8 +65,8 @@ const fetchStream = async (url: string, params: any) => {
   return await new Response(stream).text()
 }
 
-export const streamFetch = (url: string, params: any) => {
-  return fetchStream(`/api${url}`, params)
+export const streamFetch = (params: any) => {
+  return fetchStream('/local_doc_search', params)
 }
 
 export const chatfile = (params: any) => {

@@ -165,7 +165,7 @@ async function handleStreamChatIn(params: StreamingProps, options: Chat.Conversa
     scrollToBottomIfAtBottom()
     loading.value = false
   }
-  streamFetch('/local_doc_qa/stream_json', { method: 'POST', onmessage: callback })
+  streamFetch({ method: 'POST', onmessage: callback })
 }
 
 async function onConversation() {
