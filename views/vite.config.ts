@@ -41,6 +41,12 @@ export default defineConfig((env) => {
           changeOrigin: true, // 允许跨域
           rewrite: path => path.replace('/api/', ''),
         },
+        '/socket': {
+          target: 'ws://127.0.0.1:7861',
+          changeOrigin: true,
+          rewrite: path => path.replace('/socket', ''),
+          ws: true,
+        },
       },
     },
     build: {
