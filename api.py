@@ -27,7 +27,7 @@ def stream(json_post_raw):
         yield response
         time.sleep(0.0011)
 
-@app.get("/local_doc_search_stream_chat")
+@app.post("/local_doc_search_stream_chat")
 async def local_product_search_stream_chat(request: Request):
     global local_doc_search
     global vs_path
@@ -35,7 +35,7 @@ async def local_product_search_stream_chat(request: Request):
     return StreamingResponse(stream(json_post_raw), media_type="text/event-stream")
 
 
-@app.get("/local_doc_search_chat")
+@app.post("/local_doc_search_chat")
 async def local_product_search_chat(request: Request):
     global local_doc_search
     global vs_path
