@@ -146,8 +146,9 @@ interface StreamingProps {
 
 async function handleStreamChatIn(params: StreamingProps, options: Chat.ConversationRequest) {
   // 打字机效果
-  const callback = (data: any, ended: boolean) => {
-    const result = (active.value && ended) ? `${data.result}\n\n数据来源：\n\n>${data.source_documents.join('>')}` : data.result
+  const callback = (data: any) => {
+    // const result = (active.value && ended) ? `${data.result}\n\n数据来源：\n\n>${data.source_documents.join('>')}` : data.result
+    const result = data
     const lastText = dataSources.value[dataSources.value.length - 1].text
     updateChat(
       +uuid,

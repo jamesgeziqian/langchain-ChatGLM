@@ -43,10 +43,11 @@ const fetchStream = async (url: string, params: any) => {
       onclose?.()
     }
     else {
+      const decoded = new TextDecoder().decode(value)
       // 约定使用\x03 (End of Text) 作为JSON分隔符
-      const decoded = new TextDecoder().decode(value).split('\x03').filter(s => s.length > 0)
+      // const splitted = decoded.split('\x03').filter(s => s.length > 0)
       for (const s of decoded)
-        onmessage?.(JSON.parse(s))
+        onmessage?.(s)
 
       // onmessage?.(JSON.parse(new TextDecoder().decode(value)).split('\u0003'))
       controller.enqueue(value)
