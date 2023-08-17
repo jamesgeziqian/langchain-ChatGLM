@@ -1,36 +1,20 @@
-FROM python:3.8
+FROM nvidia/cuda:11.4.3-cudnn8-devel-ubuntu20.04
+LABEL MAINTAINER="ProductSearch"
 
-MAINTAINER "chatGLM"
+COPY . /ProductSearch/
 
-COPY agent /chatGLM/agent
+EXPOSE 8888
 
-COPY chains /chatGLM/chains
+RUN mkdir /ProductSearch/localModel
 
-COPY configs /chatGLM/configs
+WORKDIR /ProductSearch
 
-COPY content /chatGLM/content
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo "Asia/Shanghai" > /etc/timezone
 
-COPY models /chatGLM/models
+RUN apt-get update -y && apt-get install software-properties-common wget libxml2 python3 python3-pip curl libgl1 libglib2.0-0 make cmake -y && apt-get clean
 
-COPY nltk_data /chatGLM/content
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py 
 
-COPY requirements.txt /chatGLM/
+RUN pip3 install -r requirements.txt -i https://pypi.mirrors.ustc.edu.cn/simple/ && rm -rf `pip3 cache dir`
 
-COPY cli_demo.py /chatGLM/
-
-COPY textsplitter /chatGLM/
-
-COPY webui.py /chatGLM/
-
-WORKDIR /chatGLM
-
-RUN pip install --user torch torchvision tensorboard cython -i https://pypi.tuna.tsinghua.edu.cn/simple
-# RUN pip install --user 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
-
-# RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
-# install detectron2
-# RUN git clone https://github.com/facebookresearch/detectron2
-
-RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/ --trusted-host pypi.tuna.tsinghua.edu.cn
-
-CMD ["python","-u", "webui.py"]
+CMD ["python3", "-u", "api.py"]

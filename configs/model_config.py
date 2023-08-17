@@ -16,7 +16,7 @@ embedding_model_dict = {
     "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
     "ernie-base": "nghuyong/ernie-3.0-base-zh",
     "text2vec-base": "shibing624/text2vec-base-chinese",
-    "text2vec": "/home/llm/text2vec-large-chinese",
+    "text2vec": "text2vec-large-chinese",
     "m3e-small": "moka-ai/m3e-small",
     "m3e-base": "moka-ai/m3e-base",
 }
@@ -28,7 +28,7 @@ EMBEDDING_MODEL = "text2vec"
 EMBEDDING_DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 # local knowledge path
-LOCAL_DOC_PATH = "/home/llm/local_knowledge/test.txt"
+LOCAL_DOC_PATH = "local_knowledge/test.txt"
 
 # vector store path
 VS_PATH = "/home/llm/local_knowledge/Vector_Store/"
