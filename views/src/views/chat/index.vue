@@ -704,8 +704,8 @@ function searchfun() {
         <div class="flex items-center justify-between space-x-2">
           <NRadioGroup v-if="!isMobile" v-model:value="search" @change="searchfun">
             <NRadioButton value="对话" label="对话" />
-            <NRadioButton value="知识库" label="知识库" />
-            <NRadioButton value="Bing搜索" label="Bing搜索" />
+            <NRadioButton value="知识库" label="知识库" :disabled="true" />
+            <NRadioButton value="Bing搜索" label="Bing搜索" :disabled="true" />
           </NRadioGroup>
           <HoverButton v-if="!isMobile" @click="handleClear">
             <span class="text-xl text-[#4f555e] dark:text-white">

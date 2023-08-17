@@ -51,18 +51,22 @@ const songs = [
   {
     value: 1,
     label: '会话',
+    disabled: false,
   },
   {
     value: 2,
     label: '模型',
+    disabled: true,
   },
   {
     value: 3,
     label: '知识库',
+    disabled: true,
   },
   {
     value: 4,
     label: '提示词',
+    disabled: true,
   },
 ]
 //
@@ -100,6 +104,7 @@ watch(
               :key="song.value"
               :value="song.value"
               :label="song.label"
+              :disabled="song.disabled"
             />
           </NRadioGroup>
         </div>
