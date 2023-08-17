@@ -1,24 +1,28 @@
 # build front-end
 FROM node:lts-alpine AS frontend
 
-RUN npm install pnpm -g
+# RUN npm install pnpm -g
 
 WORKDIR /app
 
-COPY ./package.json /app
+COPY ./package.json ./package-lock.json /app/
 
-COPY ./pnpm-lock.yaml /app
-
-RUN pnpm install
+RUN npm install
 
 COPY . /app
 
-RUN pnpm run build
+RUN npm run build
 
-FROM frontend AS final
+FROM nginx:1.25.1-alpine-slim AS final
 
-COPY --from=frontend /app/dist /app/public
+RUN mkdir /app
+
+COPY --from=frontend /app/dist /app
+
+COPY nginx.conf.template /nginx.conf.template
 
 EXPOSE 3002
 
-CMD ["pnpm", "run", "preview"]
+ENTRYPOINT [ "/bin/sh", "-c", "envsubst '$BACKEND_URL' < /nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'" ]
+
+# CMD ["pnpm", "run", "preview"]
